@@ -1,6 +1,6 @@
 FROM openjdk:17
 
-COPY ./target/demo-docker*.jar /usr/app/dockerDemo.jar
+COPY ./target/springbootdocker*.jar /usr/app/dockerDemo.jar
 
 WORKDIR /usr/app
 
