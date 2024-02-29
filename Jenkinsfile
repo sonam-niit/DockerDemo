@@ -1,69 +1,54 @@
-def containerName = "spring_container"
-def imageName = "spring_image"
-def tag = "latest"
-
 pipeline {
     agent any
 
     stages {
-        stage('Checkout Source Code') {
+        stage('Build') {
             steps {
-                checkout scm
+                // Get some code from a GitHub repository
+                git 'https://github.com/tuser6794/MySpringBootApp.git'
+
+                // Run Maven Wrapper Commands
+                sh "./mvnw compile"
+
+                echo 'Building the Project with maven compile'
             }
         }
 
-        stage("Compilation") {
+        stage('Test') {
             steps {
-                sh "mvn clean install -DskipTests"
+
+                // Run Maven Wrapper Commands
+                sh "./mvnw test"
+
+                echo 'Testing the Project with maven test'
             }
         }
 
-        stage('Image Build') {
+        stage('Package') {
             steps {
-                sh "docker build -t $imageName:${env.BUILD_NUMBER} --pull --no-cache ."
-                echo "Image build complete"
+
+                // Run Maven Wrapper Commands
+                sh "./mvnw package"
+
+                echo 'Packaging the Project with maven package'
             }
         }
-
-        stage('Run Application') {
+        stage('Containerize') {
             steps {
-                script {
-                    try {
-                        // Stop existing Container if exists
-                        sh "docker stop $containerName || true"
-                        sh "docker rm $containerName || true"
 
-                        // Start the application container
-                        sh "docker run -d --name $containerName -p 8082:8082 $imageName:${env.BUILD_NUMBER}"
-                    } catch (Exception e) {
-                        echo "Error: ${e}"
-                        currentBuild.result = 'FAILURE'
-                    }
-                }
+                // Run Maven Wrapper Commands
+                sh "docker build -t myapp1 ."
+
+                echo 'Containerizing the App with Docker'
             }
         }
-
-        stage('Push Image') {
+        stage('Deploy') {
             steps {
-                script {
-                    try {
-                        // Push the Docker image to Docker Hub
-                        sh "docker push $imageName:${env.BUILD_NUMBER}"
-                    } catch (Exception e) {
-                        echo "Error: ${e}"
-                        currentBuild.result = 'FAILURE'
-                    }
-                }
-            }
-        }
-    }
 
-    post {
-        always {
-            // Stop and remove the container after the job completes
-            script {
-                sh "docker stop $containerName || true"
-                sh "docker rm $containerName || true"
+                // Run Maven Wrapper Commands
+                sh "docker run -d -p 9091:9090 myapp"
+
+                echo 'Deploy the App with Docker'
             }
         }
     }

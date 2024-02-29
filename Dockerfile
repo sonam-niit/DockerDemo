@@ -1,5 +1,4 @@
 FROM openjdk:17
-COPY ./target/springbootdocker*.jar /usr/app/dockerDemo.jar
-WORKDIR /usr/app
-EXPOSE 8082
-ENTRYPOINT ["java","-jar","dockerDemo.jar"]
+ARG JAR_FILE=target/*.jar
+COPY ${JAR_FILE} app.jar
+ENTRYPOINT ["java","-jar","/app.jar"]
