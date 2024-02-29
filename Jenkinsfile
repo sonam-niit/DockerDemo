@@ -52,14 +52,8 @@ pipeline {
         stage('Deploy') {
             steps {
 				
-				script {
-                if (sh(script: "docker inspect -f '{{.State.Running}}' mycontainer", returnStatus: true) == 0) {
-                    sh "docker stop $mycontainer || true"
-                    sh "docker rm $mycontainer || true"
-                }
-            }
                 // Run Maven Wrapper Commands
-                sh "docker run -d --name mycontainer -p 9091:9090 myapp${env.BUILD_NUMBER}"
+                sh "docker run -d --name mycontainer${env.BUILD_NUMBER} -p 9091:9090 myapp:${env.BUILD_NUMBER}"
 
                 echo 'Deploy the App with Docker'
             }
