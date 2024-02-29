@@ -37,29 +37,25 @@ pipeline {
             steps {
 
                 // Run Maven Wrapper Commands
-                sh "docker build -t myapp1 ."
+                sh "docker build -t myapp:${env.BUILD_NUMBER} ."
 
                 echo 'Containerizing the App with Docker'
             }
         }
         stage('Push Image') {
             steps {
-                script {
-                    try {
-                        // Push the Docker image to Docker Hub
-                        sh "docker push sonamdock"
-                    } catch (Exception e) {
-                        echo "Error: ${e}"
-                        currentBuild.result = 'FAILURE'
-                    }
-                }
-            }
+            			sh "sudo docker tag myapp:${env.BUILD_NUMBER} sonamsoni/cisco${env.BUILD_NUMBER}"
+                        sh "sudo docker push sonamsoni/cisco${env.BUILD_NUMBER}"
+                    echo "image pushed on DockerHub"
+            	}
         }
         stage('Deploy') {
             steps {
-
+				
+				sh "docker stop mycontainer"
+				sh "docker remove mycontainer"
                 // Run Maven Wrapper Commands
-                sh "docker run -d -p 9091:9090 myapp"
+                sh "docker run -d --name mycontainer -p 9091:9090 myapp${env.BUILD_NUMBER}"
 
                 echo 'Deploy the App with Docker'
             }
