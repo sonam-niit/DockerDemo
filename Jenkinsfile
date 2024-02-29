@@ -42,6 +42,19 @@ pipeline {
                 echo 'Containerizing the App with Docker'
             }
         }
+        stage('Push Image') {
+            steps {
+                script {
+                    try {
+                        // Push the Docker image to Docker Hub
+                        sh "docker push sonamdock"
+                    } catch (Exception e) {
+                        echo "Error: ${e}"
+                        currentBuild.result = 'FAILURE'
+                    }
+                }
+            }
+        }
         stage('Deploy') {
             steps {
 
